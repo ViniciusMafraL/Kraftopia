@@ -9,19 +9,26 @@ import { setupPlayerHandlers } from './handlers/playerHandler.js';
 
 const app = express();
 const httpServer = createServer(app);
+
+// CORS dinamico — aceita CLIENT_URL/FRONTEND_URL + localhost para dev
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  'https://kraftopia.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173'
+].filter(Boolean);
+
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'https://kraftopia.vercel.app'
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
-app.use(cors());
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
@@ -96,12 +103,13 @@ io.on('connection', (socket) => {
 
 });
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔════════════════════════════════════════╗
 ║  🎮 Kraftopia Server Iniciado!        ║
-║  📍 http://localhost:${PORT}               ║
+║  📍 Porta: ${PORT}                        ║
 ║  ✅ Socket.io ativo                   ║
+║  🌐 Origins: ${allowedOrigins.join(', ')}
 ╚════════════════════════════════════════╝
   `);
 });
