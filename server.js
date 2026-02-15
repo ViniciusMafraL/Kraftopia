@@ -11,7 +11,12 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'https://kraftopia.vercel.app'
+    ],
     methods: ['GET', 'POST']
   }
 });
@@ -19,7 +24,7 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const roomManager = new RoomManager();
 
 // Global interval for syncing room states (every 5 seconds)
@@ -89,8 +94,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {
-  });
 });
 
 httpServer.listen(PORT, () => {
